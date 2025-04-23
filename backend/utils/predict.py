@@ -3,7 +3,8 @@ import numpy as np
 import librosa
 import soundfile as sf
 import os
-import gdown  # For downloading from Google Drive
+import gdown  
+from backend.model.model import UNet
 
 # Define model path
 MODEL_PATH = "backend/model/best_model.pth"
