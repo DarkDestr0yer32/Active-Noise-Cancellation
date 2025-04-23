@@ -1,0 +1,94 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Real-Time Audio Denoising</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1>🎧 Active Noise Cancellation Using Deep Learning</h1>
+
+    <div class="upload-section">
+      <label for="audioFile" class="primary-btn">Choose Audio File</label>
+      <input type="file" id="audioFile" accept=".wav" onchange="showFileName()">
+      <span id="fileNameLabel">No file chosen</span>
+      <button class="primary-btn" onclick="upload()">Upload & Denoise</button>
+    </div>
+
+    <div class="audio-section">
+      <div class="audio-box">
+        <h3>Original Noisy Audio</h3>
+        <audio id="noisyAudio" controls></audio>
+      </div>
+      <div class="audio-box">
+        <h3>Denoised Audio</h3>
+        <audio id="resultAudio" controls></audio>
+      </div>
+    </div>
+
+    <div class="section" id="fullSection">
+      <h2>📊 Full Signal Visualization</h2>
+      <div class="image-grid" id="fullPlots"></div>
+    </div>
+
+    <div class="section" id="chunkSection">
+      <h2>🔎 Chunk-wise Visualization</h2>
+      <div class="image-grid" id="chunkPlots"></div>
+    </div>
+  </div>
+
+  <script>
+    function showFileName() {
+      const fileInput = document.getElementById('audioFile');
+      const label = document.getElementById('fileNameLabel');
+      if (fileInput.files.length > 0) {
+        label.textContent = "Selected: " + fileInput.files[0].name;
+      } else {
+        label.textContent = "No file chosen";
+      }
+    }
+
+    function upload() {
+      const fileInput = document.getElementById('audioFile');
+      const formData = new FormData();
+      const timestamp = new Date().getTime();
+      formData.append('file', fileInput.files[0]);
+
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('noisyAudio').src = '/get_audio/' + fileInput.files[0].name + `?t=${timestamp}`;
+        document.getElementById('resultAudio').src = '/get_audio/' + data.denoised_audio + `?t=${timestamp}`;
+
+        document.getElementById('fullPlots').innerHTML = '';
+        document.getElementById('chunkPlots').innerHTML = '';
+
+        data.plots.forEach((plot, index) => {
+          const img = document.createElement('img');
+          img.src = '/get_audio/' + plot + `?t=${timestamp}`;
+          img.classList.add('plot-image');
+
+          if (plot.includes('full')) {
+            document.getElementById('fullPlots').appendChild(img);
+          } else {
+            const chunkLabel = document.createElement('div');
+            chunkLabel.classList.add('chunk-label');
+            chunkLabel.innerText = `Chunk ${index}`;
+            document.getElementById('chunkPlots').appendChild(chunkLabel);
+            document.getElementById('chunkPlots').appendChild(img);
+          }
+        });
+      })
+      .catch(error => {
+        alert("Upload failed. Try again.\n" + error);
+      });
+    }
+  </script>
+</body>
+</html>

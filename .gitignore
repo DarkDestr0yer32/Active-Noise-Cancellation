@@ -1,0 +1,15 @@
+# Ignore bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore model
+*.pth
+
+# Ignore media and generated outputs
+uploads/
+*.wav
+*.png
+*.jpg
+*.jpeg
