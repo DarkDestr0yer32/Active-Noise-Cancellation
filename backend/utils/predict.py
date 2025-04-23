@@ -4,8 +4,6 @@ import librosa
 import soundfile as sf
 from model.model import UNet
 
-from utils.visualize import generate_all_plots
-
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MODEL_PATH = "backend/model/best_model.pth"
 SAMPLE_RATE = 16000
