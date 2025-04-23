@@ -2,10 +2,19 @@ import torch
 import numpy as np
 import librosa
 import soundfile as sf
-from model.model import UNet
+import os
+import gdown  # For downloading from Google Drive
+
+# Define model path
+MODEL_PATH = "backend/model/best_model.pth"
+
+# Check if model exists, if not, download it
+if not os.path.exists(MODEL_PATH):
+    print("Downloading model...")
+    # Google Drive link (replace with your file ID)
+    gdown.download("https://drive.google.com/uc?id=1Z_BV5E5pkR9dHwIqgrBTMh-iuKBwD6ud", MODEL_PATH, quiet=False)
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-MODEL_PATH = "backend/model/best_model.pth"
 SAMPLE_RATE = 16000
 CHUNK_DURATION = 2.0
 CHUNK_SIZE = int(SAMPLE_RATE * CHUNK_DURATION)

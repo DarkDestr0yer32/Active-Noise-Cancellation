@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, request, jsonify, send_file, render_template
 from .utils.predict import denoise_audio
 from .utils.visualize import generate_all_plots
@@ -21,6 +20,7 @@ def upload_audio():
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(filepath)
 
+    # Call denoising function
     denoised_path, noisy_audio, denoised_audio, chunk_results = denoise_audio(filepath)
     plot_paths = generate_all_plots(filepath, denoised_audio, noisy_audio, chunk_results)
 
