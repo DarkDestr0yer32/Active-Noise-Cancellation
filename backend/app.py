@@ -1,7 +1,7 @@
 # app.py
 from flask import Flask, request, jsonify, send_file, render_template
-from utils.predict import denoise_audio
-from utils.visualize import generate_all_plots
+from .utils.predict import denoise_audio
+from .utils.visualize import generate_all_plots
 import os
 import time
 
