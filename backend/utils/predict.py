@@ -3,33 +3,50 @@ import numpy as np
 import librosa
 import soundfile as sf
 import os
-import gdown  
+import gdown  # For downloading from Google Drive
+
+# Import the UNet model from the correct location
 from backend.model.model import UNet
+
+# Initialize the model as None
+model = None
 
 # Define model path
 MODEL_PATH = "backend/model/best_model.pth"
 
-# Check if model exists, if not, download it
-if not os.path.exists(MODEL_PATH):
-    print("Downloading model...")
-    # Google Drive link (replace with your file ID)
-    gdown.download("https://drive.google.com/uc?id=1Z_BV5E5pkR9dHwIqgrBTMh-iuKBwD6ud", MODEL_PATH, quiet=False)
+# Function to load the model lazily
+def load_model():
+    global model
+    if model is None:
+        print("Loading model...")
+        
+        # Check if the model file exists
+        if not os.path.exists(MODEL_PATH):
+            print("Downloading model...")
+            # Replace with your own Google Drive file ID
+            gdown.download("https://drive.google.com/uc?id=1Z_BV5E5pkR9dHwIqgrBTMh-iuKBwD6ud", MODEL_PATH, quiet=False)
+        
+        # Load the model
+        model = UNet().to(DEVICE)
+        checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
+        model.load_state_dict(checkpoint["model_state_dict"] if "model_state_dict" in checkpoint else checkpoint)
+        model.eval()
 
+    return model
+
+# Define the device
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Hyperparameters
 SAMPLE_RATE = 16000
 CHUNK_DURATION = 2.0
 CHUNK_SIZE = int(SAMPLE_RATE * CHUNK_DURATION)
 N_FFT = 1024
 HOP_LENGTH = 256
 
-# Load model
-model = UNet().to(DEVICE)
-checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
-model.load_state_dict(checkpoint["model_state_dict"] if "model_state_dict" in checkpoint else checkpoint)
-model.eval()
-
 def process_chunk(chunk):
     """Process a chunk with proper padding and denoising."""
+    model = load_model()  # Lazy load model when needed
     noisy_spec = librosa.stft(chunk, n_fft=N_FFT, hop_length=HOP_LENGTH)
     noisy_mag = np.abs(noisy_spec)
 
